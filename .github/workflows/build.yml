@@ -21,11 +21,7 @@ jobs:
         with:
           gradle-version: '9.2.0'
 
-      - name: Build
-        run: gradle build --stacktrace
+      - name: First pass to populate dependency cache
+        run: gradle dependencies --configuration modImplementation || true
 
-      - name: Upload jar
-        uses: actions/upload-artifact@v4
-        with:
-          name: white-jar
-          path: build/libs/*.jar
+      - name: Locate RenderEvents
