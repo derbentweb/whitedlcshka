@@ -1,0 +1,45 @@
+plugins {
+    id 'fabric-loom' version "${project.loom_version}"
+    id 'maven-publish'
+}
+
+version = project.mod_version
+group = project.maven_group
+
+base {
+    archivesName = project.archives_base_name
+}
+
+repositories {
+    // достаточно того, что уже подключает Loom (Fabric maven, Maven Central)
+}
+
+dependencies {
+    minecraft "com.mojang:minecraft:${project.minecraft_version}"
+    // ВАЖНО: в MANIFEST.MF твоего jar'а стоит "Fabric-Mapping-Namespace: intermediary",
+    // а исходники напрямую используют class_310/method_36456 и т.п. — значит проект
+    // собирался БЕЗ Yarn (Yarn заменил бы эти имена на читаемые, и твой код просто
+    // не скомпилировался бы). Поставил intermediary явно вместо обычного `yarn:...`,
+    // который стоит в большинстве шаблонов fabric-example-mod. Если у тебя в
+    // реальном build.gradle было иначе (например кастомный mappings-слой) — это
+    // единственное место в файле, которое стоит свериться с оригиналом.
+    mappings "net.fabricmc:intermediary:${project.minecraft_version}:v2"
+    modImplementation "net.fabricmc:fabric-loader:${project.loader_version}"
+    modImplementation "net.fabricmc.fabric-api:fabric-api:${project.fabric_version}"
+}
+
+processResources {
+    inputs.property "version", project.version
+    filesMatching("fabric.mod.json") {
+        expand "version": project.version
+    }
+}
+
+tasks.withType(JavaCompile).configureEach {
+    options.encoding = "UTF-8"
+    options.release = 21
+}
+
+java {
+    withSourcesJar()
+}
