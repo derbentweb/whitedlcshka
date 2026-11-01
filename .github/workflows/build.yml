@@ -25,7 +25,13 @@ jobs:
         run: gradle dependencies --configuration modImplementation || true
 
       - name: Locate RenderEvents class
-        run: find ~/.gradle ./.gradle -iname "*.jar" -exec sh -c 'unzip -l "$1" 2>/dev/null | grep -qi RenderEvents && echo "FOUND IN: $1" && unzip -l "$1" | grep -i RenderEvents' _ {} \;
+        run: |
+          for jar in $(find ~/.gradle ./.gradle -iname "*.jar" 2>/dev/null); do
+            if unzip -l "$jar" 2>/dev/null | grep -qi RenderEvents; then
+              echo "FOUND -- $jar"
+              unzip -l "$jar" | grep -i RenderEvents
+            fi
+          done
 
       - name: Build
         run: gradle build --stacktrace
